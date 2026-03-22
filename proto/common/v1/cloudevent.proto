@@ -19,7 +19,7 @@ option go_package = "github.com/mathtrail/contracts/gen/go/common/v1;commonv1";
 //   - Kafka value = Confluent Wire Format Protobuf of CloudEvent (this message)
 //   - CloudEvent.data = serialized bytes of the domain event (e.g. StudentOnboardingReady)
 //
-// Note: event proto files (students/v1, identity/v1) do NOT import this file.
+// Note: domain event proto files do NOT import this file.
 message CloudEvent {
   // Unique event ID (UUID v4)
   string id = 1;
