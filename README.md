@@ -13,15 +13,21 @@ This repository defines the event contracts for the MathTrail EDA stack. It cont
 
 ## Event Pipeline
 
-```
-PostgreSQL (Kratos)
-  → RisingWave Native CDC (publication + replication slot)
-  → RisingWave Materialized Views (SQL transformations)
-  → AutoMQ (Kafka-compatible, MinIO tiered storage)
-      ├── Value:   Confluent Wire Format  [0x00][4-byte schema_id][protobuf bytes]
-      └── Headers: CloudEvents Binary Mode  ce_specversion, ce_type, ce_source, ce_id, ce_time
-  ← Apicurio Registry  (Protobuf schemas, Confluent compat API v7)
-  ← mentor-api          (SASL/SCRAM-SHA-512, Confluent wire format decode + CE header parse)
+```mermaid
+flowchart TD
+    PG[(PostgreSQL\nKratos)]
+    CDC[RisingWave\nNative CDC]
+    MV["RisingWave\nMaterialized Views\n(SQL transformations)"]
+    AMQ["AutoMQ\n(Kafka-compatible · MinIO tiered storage)\n\nValue: [0x00][schema_id][proto bytes]\nHeaders: ce_type · ce_id · ce_source · ce_time"]
+    APR["Apicurio Registry\n(Protobuf schemas · Confluent compat v7)"]
+    MA["mentor-api\n(SASL/SCRAM-SHA-512)"]
+
+    PG -->|"publication + replication slot"| CDC
+    CDC --> MV
+    MV -->|"Confluent Wire Format\n+ CloudEvents Binary Mode headers"| AMQ
+    APR -.->|"schema registration"| AMQ
+    AMQ -->|"Confluent wire format decode\nCE header parse"| MA
+    APR -.->|"TopicValidator: schema_id validation"| MA
 ```
 
 ## Schemas
