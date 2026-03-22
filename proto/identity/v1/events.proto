@@ -5,7 +5,6 @@ package identity.v1;
 option go_package = "github.com/mathtrail/contracts/gen/go/identity/v1;identityv1";
 
 // UserCreated is published when a new Kratos identity is created.
-// Replaces the KratosIdentity Avro schema.
 //
 // Produced by: RisingWave CDC sink (topic: identity.users.created)
 //
@@ -38,7 +37,6 @@ message UserCreated {
 }
 
 // AddressCreated is published when a verifiable address is added to an identity.
-// Replaces the KratosVerifiableAddress Avro schema.
 //
 // Produced by: RisingWave CDC sink (topic: identity.addresses.created)
 //
