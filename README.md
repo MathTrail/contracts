@@ -20,7 +20,7 @@ flowchart TD
     MV["RisingWave\nMaterialized Views\n(SQL transformations)"]
     AMQ["AutoMQ\n(Kafka-compatible · MinIO tiered storage)\n\nValue: [0x00][schema_id][proto bytes]\nHeaders: ce_type · ce_id · ce_source · ce_time"]
     APR["Apicurio Registry\n(Protobuf schemas · Confluent compat v7)"]
-    MA["mentor-api\n(SASL/SCRAM-SHA-512)"]
+    MA["Microservice\n(SASL/SCRAM-SHA-512)"]
 
     PG -->|"publication + replication slot"| CDC
     CDC --> MV
@@ -34,7 +34,7 @@ flowchart TD
 
 | Proto package | Message | Topic | Consumer |
 |---|---|---|---|
-| `students.v1` | `StudentOnboardingReady` | `students.onboarding.ready` | mentor-api |
+| `students.v1` | `StudentOnboardingReady` | `students.onboarding.ready` | microservice |
 | `identity.v1` | `UserCreated` | `identity.users.created` | — |
 | `identity.v1` | `AddressCreated` | `identity.addresses.created` | — |
 

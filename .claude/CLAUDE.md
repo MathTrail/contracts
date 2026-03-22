@@ -24,7 +24,7 @@ Single source of truth for MathTrail event schemas, generated Go code, AsyncAPI 
 
 | File | Purpose |
 |------|---------|
-| `proto/students/v1/events.proto` | `StudentOnboardingReady` — consumed by mentor-api |
+| `proto/students/v1/events.proto` | `StudentOnboardingReady` — consumed by microservices |
 | `proto/identity/v1/events.proto` | `UserCreated`, `AddressCreated` — CDC from Kratos |
 | `proto/common/v1/cloudevent.proto` | CloudEvent envelope — Variant B fallback only, NOT imported by event protos |
 | `gen/go/` | Generated `.pb.go` files — committed, importable without buf |
@@ -41,15 +41,21 @@ Single source of truth for MathTrail event schemas, generated Go code, AsyncAPI 
 
 ### Event Pipeline
 
-```
-PostgreSQL (Kratos)
-  → RisingWave CDC (publication + slot)
-  → RisingWave Materialized Views
-  → AutoMQ topics
-      Value:   [0x00][4-byte schema_id][protobuf bytes]   ← Confluent Wire Format
-      Headers: ce_specversion, ce_type, ce_source, ce_id, ce_time  ← CloudEvents Binary Mode
-  ← Apicurio Registry  (schemas registered via Confluent compat API v7)
-  ← mentor-api         (TopicValidator + proto.Unmarshal + CE header parse)
+```mermaid
+flowchart TD
+    PG[(PostgreSQL\nKratos)]
+    CDC[RisingWave\nNative CDC]
+    MV["RisingWave\nMaterialized Views\n(SQL transformations)"]
+    AMQ["AutoMQ\n(Kafka-compatible · MinIO tiered storage)\n\nValue: [0x00][schema_id][proto bytes]\nHeaders: ce_type · ce_id · ce_source · ce_time"]
+    APR["Apicurio Registry\n(Protobuf schemas · Confluent compat v7)"]
+    MA["Microservice\n(SASL/SCRAM-SHA-512)"]
+
+    PG -->|"publication + replication slot"| CDC
+    CDC --> MV
+    MV -->|"Confluent Wire Format\n+ CloudEvents Binary Mode headers"| AMQ
+    APR -.->|"schema registration"| AMQ
+    AMQ -->|"Confluent wire format decode\nCE header parse"| MA
+    APR -.->|"TopicValidator: schema_id validation"| MA
 ```
 
 ### Schemas
@@ -157,5 +163,5 @@ replace github.com/mathtrail/contracts => ../contracts
 | Repo | Purpose |
 |------|---------|
 | `infra-streaming` | Apicurio schema registration job consumes `.proto` content from this repo |
-| `mentor-api` | Imports `gen/go/students/v1` to decode `StudentOnboardingReady` |
+| Go microservices | Import generated packages from `gen/go/` to decode event messages |
 | `core` | `MathTrail/core/.github/actions/setup-env@v1` loaded by CI workflows |
