@@ -30,40 +30,6 @@ flowchart TD
     APR -.->|"TopicValidator: schema_id validation"| MA
 ```
 
-## Schemas
-
-| Proto package | Message | Topic | Consumer |
-|---|---|---|---|
-| `students.v1` | `StudentOnboardingReady` | `students.onboarding.ready` | microservice |
-| `identity.v1` | `UserCreated` | `identity.users.created` | — |
-| `identity.v1` | `AddressCreated` | `identity.addresses.created` | — |
-
-All fields use `string` for scalar types. Timestamps are ISO 8601 strings — no `google.protobuf.Timestamp` imports. Schemas are self-contained (no `import` directives), which allows direct registration via the Apicurio Confluent compat API without the references API.
-
-## Repository Structure
-
-```
-contracts/
-├── proto/                          # Protobuf schema definitions
-│   ├── common/v1/cloudevent.proto  # CloudEvent envelope (Variant B fallback only)
-│   ├── identity/v1/events.proto    # UserCreated, AddressCreated
-│   └── students/v1/events.proto    # StudentOnboardingReady
-├── gen/go/                         # Generated Go code (committed)
-│   ├── common/v1/
-│   ├── identity/v1/
-│   └── students/v1/
-├── asyncapi/
-│   └── mathtrail-events.yaml       # AsyncAPI v3 specification
-├── eventcatalog/                   # EventCatalog portal
-│   ├── eventcatalog.config.js
-│   ├── Dockerfile
-│   └── package.json
-├── buf.yaml                        # buf module config (lint + breaking rules)
-├── buf.gen.yaml                    # buf code generation config
-├── go.mod                          # Go module: github.com/mathtrail/contracts
-└── justfile                        # Development and CI recipes
-```
-
 ## Quick Start
 
 Open in devcontainer — buf, Go, Node.js, and just are pre-installed.
