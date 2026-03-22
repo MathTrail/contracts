@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/mathtrail/contracts/gen/go/common/v1;commonv1";
+
+// CloudEvent is a Protobuf envelope for CloudEvents Structured Content Mode.
+//
+// USE ONLY as fallback (Variant B) when RisingWave Kafka sink does not support
+// dynamic per-message Kafka headers (Binary Mode / Variant A).
+//
+// In Variant A (preferred):
+//   - Kafka headers carry CE attributes (ce_type, ce_id, ce_source, ce_time, ce_specversion)
+//   - Kafka value = Confluent Wire Format Protobuf of the domain event
+//   - This message is NOT used
+//
+// In Variant B (fallback):
+//   - Kafka headers are absent
+//   - Kafka value = Confluent Wire Format Protobuf of CloudEvent (this message)
+//   - CloudEvent.data = serialized bytes of the domain event (e.g. StudentOnboardingReady)
+//
+// Note: event proto files (students/v1, identity/v1) do NOT import this file.
+message CloudEvent {
+  // Unique event ID (UUID v4)
+  string id = 1;
+
+  // Event source URI (e.g. /mathtrail/risingwave)
+  string source = 2;
+
+  // CloudEvents spec version, always "1.0"
+  string spec_version = 3;
+
+  // Event type (e.g. com.mathtrail.students.onboarding.ready)
+  string type = 4;
+
+  // ISO 8601 event time
+  string time = 5;
+
+  // Serialized domain event bytes (proto.Marshal of the actual event message)
+  bytes data = 6;
+
+  // Content type of data field (e.g. "application/vnd.google.protobuf")
+  string data_content_type = 7;
+
+  // Schema reference (e.g. subject name in Apicurio)
+  string data_schema = 8;
+}

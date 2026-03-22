@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: mathtrail-runners
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        uses: MathTrail/core/.github/actions/setup-env@v1
+
+      - name: Lint and check breaking changes
+        run: just ci-lint && just ci-test
+
+  release:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: mathtrail-runners
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: MathTrail/core/.github/actions/setup-env@v1
+
+      - name: Build and Push EventCatalog image
+        run: |
+          just build-push-image "${{ env.REGISTRY_CLUSTER }}/eventcatalog:${{ github.sha }}"

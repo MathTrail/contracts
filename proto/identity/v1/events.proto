@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package identity.v1;
+
+option go_package = "github.com/mathtrail/contracts/gen/go/identity/v1;identityv1";
+
+// UserCreated is published when a new Kratos identity is created.
+// Replaces the KratosIdentity Avro schema.
+//
+// Produced by: RisingWave CDC sink (topic: identity.users.created)
+//
+// CloudEvents attributes (Kafka Binary Mode headers):
+//   ce_type:    com.mathtrail.identity.user.created
+//   ce_source:  /mathtrail/risingwave
+//
+// Wire format: Confluent [0x00][4-byte schema_id][protobuf bytes]
+message UserCreated {
+  // Unique event identifier (UUID v4)
+  string event_id = 1;
+
+  // Kratos identity ID (UUID)
+  string identity_id = 2;
+
+  // Identity schema ID from Kratos
+  string schema_id = 3;
+
+  // Identity state (e.g. "active", "inactive")
+  string state = 4;
+
+  // ISO 8601 timestamp of identity creation
+  string created_at = 5;
+
+  // CDC operation type (__op): c=create, u=update, d=delete, r=snapshot
+  string op = 6;
+
+  // CDC event timestamp in milliseconds (__ts_ms)
+  string ts_ms = 7;
+}
+
+// AddressCreated is published when a verifiable address is added to an identity.
+// Replaces the KratosVerifiableAddress Avro schema.
+//
+// Produced by: RisingWave CDC sink (topic: identity.addresses.created)
+//
+// CloudEvents attributes (Kafka Binary Mode headers):
+//   ce_type:    com.mathtrail.identity.address.created
+//   ce_source:  /mathtrail/risingwave
+message AddressCreated {
+  // Unique event identifier (UUID v4)
+  string event_id = 1;
+
+  // Verifiable address ID (UUID)
+  string address_id = 2;
+
+  // Parent identity ID (UUID)
+  string identity_id = 3;
+
+  // Address value (email address)
+  string value = 4;
+
+  // Address type via (e.g. "email")
+  string via = 5;
+
+  // Whether address is verified
+  string verified = 6;
+
+  // ISO 8601 timestamp
+  string created_at = 7;
+
+  // CDC operation type (__op)
+  string op = 8;
+}

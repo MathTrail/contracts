@@ -1,0 +1,186 @@
+asyncapi: 3.0.0
+info:
+  title: MathTrail Event Catalog
+  version: 0.1.0
+  description: |
+    Event contracts for MathTrail platform EDA stack.
+
+    **Stack:** RisingWave CDC → AutoMQ (MinIO) → Protobuf + CloudEvents Binary Mode
+    **Wire format:** Confluent Wire Format — `[0x00][4-byte schema_id][protobuf bytes]`
+    **Schema Registry:** Apicurio Registry (Confluent compat API v7)
+    **CloudEvents:** Binary Mode — CE attributes in Kafka record headers
+
+servers:
+  local-automq:
+    host: automq-broker:9092
+    protocol: kafka
+    description: AutoMQ broker (local k3d cluster). SASL_PLAINTEXT / SCRAM-SHA-512.
+    security:
+      - $ref: "#/components/securitySchemes/scramSha512"
+
+channels:
+  students/onboarding/ready:
+    address: students.onboarding.ready
+    description: |
+      Published when a new student identity is active and ready for mentor assignment.
+      Produced by RisingWave materialized view joining identities + verifiable_addresses.
+    messages:
+      studentOnboardingReady:
+        $ref: "#/components/messages/StudentOnboardingReady"
+
+  identity/users/created:
+    address: identity.users.created
+    description: |
+      Published when a new Kratos identity is created (CDC from public.identities).
+      Produced by RisingWave CDC source.
+    messages:
+      userCreated:
+        $ref: "#/components/messages/UserCreated"
+
+  identity/addresses/created:
+    address: identity.addresses.created
+    description: |
+      Published when a verifiable address is created (CDC from public.identity_verifiable_addresses).
+      Produced by RisingWave CDC source.
+    messages:
+      addressCreated:
+        $ref: "#/components/messages/AddressCreated"
+
+  students/onboarding/ready/dlq:
+    address: students.onboarding.ready.dlq
+    description: Dead-letter queue for StudentOnboardingReady events that fail schema validation in mentor-api.
+
+operations:
+  publishStudentOnboardingReady:
+    action: send
+    channel:
+      $ref: "#/channels/students~1onboarding~1ready"
+    description: RisingWave publishes StudentOnboardingReady after joining CDC tables.
+
+  consumeStudentOnboardingReady:
+    action: receive
+    channel:
+      $ref: "#/channels/students~1onboarding~1ready"
+    description: mentor-api consumes StudentOnboardingReady to create mentor recommendations.
+
+components:
+  messages:
+    StudentOnboardingReady:
+      name: StudentOnboardingReady
+      title: Student Onboarding Ready
+      summary: A student identity is active and ready for mentor matching.
+      contentType: application/vnd.google.protobuf
+      headers:
+        type: object
+        properties:
+          ce_specversion:
+            type: string
+            const: "1.0"
+            description: CloudEvents spec version
+          ce_type:
+            type: string
+            const: com.mathtrail.students.onboarding.ready
+            description: CloudEvents event type
+          ce_source:
+            type: string
+            const: /mathtrail/risingwave
+            description: CloudEvents source
+          ce_id:
+            type: string
+            description: CloudEvents unique event ID (UUID v4, generated per message)
+          ce_time:
+            type: string
+            description: CloudEvents event time (ISO 8601)
+        required:
+          - ce_specversion
+          - ce_type
+          - ce_source
+          - ce_id
+          - ce_time
+      payload:
+        type: object
+        description: |
+          Protobuf message: students.v1.StudentOnboardingReady
+          Schema: proto/students/v1/events.proto
+          Apicurio subject: students.v1.StudentOnboardingReady
+        properties:
+          event_id:
+            type: string
+            description: Unique event ID (UUID v4)
+          user_id:
+            type: string
+            description: Kratos identity ID (UUID)
+          email:
+            type: string
+            description: Verified email address
+          first_name:
+            type: string
+          last_name:
+            type: string
+          role:
+            type: string
+            const: student
+          occurred_at:
+            type: string
+            description: ISO 8601 timestamp
+
+    UserCreated:
+      name: UserCreated
+      title: User Created
+      summary: A new Kratos identity was created (CDC event).
+      contentType: application/vnd.google.protobuf
+      headers:
+        type: object
+        properties:
+          ce_specversion:
+            type: string
+            const: "1.0"
+          ce_type:
+            type: string
+            const: com.mathtrail.identity.user.created
+          ce_source:
+            type: string
+            const: /mathtrail/risingwave
+          ce_id:
+            type: string
+          ce_time:
+            type: string
+      payload:
+        type: object
+        description: |
+          Protobuf message: identity.v1.UserCreated
+          Schema: proto/identity/v1/events.proto
+          Apicurio subject: identity.v1.UserCreated
+
+    AddressCreated:
+      name: AddressCreated
+      title: Address Created
+      summary: A verifiable address was added to a Kratos identity (CDC event).
+      contentType: application/vnd.google.protobuf
+      headers:
+        type: object
+        properties:
+          ce_specversion:
+            type: string
+            const: "1.0"
+          ce_type:
+            type: string
+            const: com.mathtrail.identity.address.created
+          ce_source:
+            type: string
+            const: /mathtrail/risingwave
+          ce_id:
+            type: string
+          ce_time:
+            type: string
+      payload:
+        type: object
+        description: |
+          Protobuf message: identity.v1.AddressCreated
+          Schema: proto/identity/v1/events.proto
+          Apicurio subject: identity.v1.AddressCreated
+
+  securitySchemes:
+    scramSha512:
+      type: scramSha512
+      description: SASL/SCRAM-SHA-512. Credentials delivered via Vault VSO → K8s Secret.

@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: mathtrail-runners
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for buf breaking --against main
+
+      - name: Setup Environment
+        uses: MathTrail/core/.github/actions/setup-env@v1
+
+      - name: Lint proto schemas
+        run: just ci-lint
+
+      - name: Check breaking changes
+        run: just ci-test
+
+      - name: Build (generate Go + EventCatalog)
+        run: just ci-build

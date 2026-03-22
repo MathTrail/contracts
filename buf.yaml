@@ -1,0 +1,12 @@
+version: v2
+modules:
+  - path: proto
+    name: buf.build/mathtrail/contracts
+lint:
+  use:
+    - STANDARD
+  except:
+    - FIELD_LOWER_SNAKE_CASE  # allow snake_case fields (matching Avro naming)
+breaking:
+  use:
+    - FILE

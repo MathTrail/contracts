@@ -1,0 +1,30 @@
+{
+    "name": "MathTrail Contracts",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "initializeCommand": "docker pull ghcr.io/mathtrail/platform-env:1",
+    "features": {
+        "ghcr.io/devcontainers/features/go:1": {
+            "version": "1.26.0"
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22"
+        },
+        "ghcr.io/eitsupi/devcontainer-features/just:0.1.1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.go",
+                "zxh404.vscode-proto3",
+                "redhat.vscode-yaml",
+                "eamodio.gitlens",
+                "sclu1034.justfile",
+                "anthropic.claude-code",
+                "GitHub.vscode-github-actions"
+            ]
+        }
+    },
+    "postStartCommand": "bash .devcontainer/post-start.sh"
+}

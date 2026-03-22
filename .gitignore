@@ -30,3 +30,13 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# EventCatalog build output and dependencies
+eventcatalog/.eventcatalog/
+eventcatalog/node_modules/
+eventcatalog/.next/
+
+# Generated Go protobuf code is COMMITTED to the repo
+# so consumers can use it as a Go module without running buf locally.
+# Uncomment below to gitignore if switching to remote generation (buf.build BSR).
+# gen/

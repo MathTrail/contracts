@@ -1,0 +1,16 @@
+{
+  "name": "mathtrail-eventcatalog",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "eventcatalog start",
+    "build": "eventcatalog build",
+    "generate": "eventcatalog generate",
+    "preview": "eventcatalog preview"
+  },
+  "dependencies": {
+    "@eventcatalog/core": "^2.7.0",
+    "@eventcatalog/generator-asyncapi": "^2.4.0"
+  },
+  "type": "module"
+}
