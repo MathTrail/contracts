@@ -15,11 +15,11 @@ This repository defines the event contracts for the MathTrail EDA stack. It cont
 
 ```mermaid
 flowchart TD
-    PG[(PostgreSQL\nKratos)]
+    PG[(PostgreSQL)]
     CDC[RisingWave\nNative CDC]
     MV["RisingWave\nMaterialized Views\n(SQL transformations)"]
-    AMQ["AutoMQ\n(Kafka-compatible · MinIO tiered storage)\n\nValue: [0x00][schema_id][proto bytes]\nHeaders: ce_type · ce_id · ce_source · ce_time"]
-    APR["Apicurio Registry\n(Protobuf schemas · Confluent compat v7)"]
+    AMQ["AutoMQ\n(MinIO tiered storage)]
+    APR["Apicurio Registry\n(Protobuf schemas)"]
     MA["Microservice\n(SASL/SCRAM-SHA-512)"]
 
     PG -->|"publication + replication slot"| CDC
