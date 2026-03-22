@@ -18,7 +18,7 @@ flowchart TD
     PG[(PostgreSQL)]
     CDC[RisingWave\nNative CDC]
     MV["RisingWave\nMaterialized Views\n(SQL transformations)"]
-    AMQ["AutoMQ\n(MinIO tiered storage)]
+    AMQ["AutoMQ\n(MinIO tiered storage)"]
     APR["Apicurio Registry\n(Protobuf schemas)"]
     MA["Microservice\n(SASL/SCRAM-SHA-512)"]
 
