@@ -11,8 +11,8 @@ option go_package = "github.com/mathtrail/contracts/gen/go/students/v1;studentsv
 // Consumed by: mentor-api
 //
 // CloudEvents attributes (Kafka Binary Mode headers):
-//   ce_type:    com.mathtrail.students.onboarding.ready
-//   ce_source:  /mathtrail/risingwave
+//   ce-type:    com.mathtrail.students.onboarding.ready
+//   ce-source:  /mathtrail/risingwave
 //
 // Wire format: Confluent [0x00][4-byte schema_id][protobuf bytes]
 message StudentOnboardingReady {

@@ -9,8 +9,8 @@ option go_package = "github.com/mathtrail/contracts/gen/go/identity/v1;identityv
 // Produced by: RisingWave CDC sink (topic: identity.users.created)
 //
 // CloudEvents attributes (Kafka Binary Mode headers):
-//   ce_type:    com.mathtrail.identity.user.created
-//   ce_source:  /mathtrail/risingwave
+//   ce-type:    com.mathtrail.identity.user.created
+//   ce-source:  /mathtrail/risingwave
 //
 // Wire format: Confluent [0x00][4-byte schema_id][protobuf bytes]
 message UserCreated {
@@ -41,8 +41,8 @@ message UserCreated {
 // Produced by: RisingWave CDC sink (topic: identity.addresses.created)
 //
 // CloudEvents attributes (Kafka Binary Mode headers):
-//   ce_type:    com.mathtrail.identity.address.created
-//   ce_source:  /mathtrail/risingwave
+//   ce-type:    com.mathtrail.identity.address.created
+//   ce-source:  /mathtrail/risingwave
 message AddressCreated {
   // Unique event identifier (UUID v4)
   string event_id = 1;

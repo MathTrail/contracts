@@ -73,30 +73,30 @@ components:
       headers:
         type: object
         properties:
-          ce_specversion:
+          ce-specversion:
             type: string
             const: "1.0"
             description: CloudEvents spec version
-          ce_type:
+          ce-type:
             type: string
             const: com.mathtrail.students.onboarding.ready
             description: CloudEvents event type
-          ce_source:
+          ce-source:
             type: string
             const: /mathtrail/risingwave
             description: CloudEvents source
-          ce_id:
+          ce-id:
             type: string
             description: CloudEvents unique event ID (UUID v4, generated per message)
-          ce_time:
+          ce-time:
             type: string
             description: CloudEvents event time (ISO 8601)
         required:
-          - ce_specversion
-          - ce_type
-          - ce_source
-          - ce_id
-          - ce_time
+          - ce-specversion
+          - ce-type
+          - ce-source
+          - ce-id
+          - ce-time
       payload:
         type: object
         description: |
@@ -132,18 +132,18 @@ components:
       headers:
         type: object
         properties:
-          ce_specversion:
+          ce-specversion:
             type: string
             const: "1.0"
-          ce_type:
+          ce-type:
             type: string
             const: com.mathtrail.identity.user.created
-          ce_source:
+          ce-source:
             type: string
             const: /mathtrail/risingwave
-          ce_id:
+          ce-id:
             type: string
-          ce_time:
+          ce-time:
             type: string
       payload:
         type: object
@@ -160,18 +160,18 @@ components:
       headers:
         type: object
         properties:
-          ce_specversion:
+          ce-specversion:
             type: string
             const: "1.0"
-          ce_type:
+          ce-type:
             type: string
             const: com.mathtrail.identity.address.created
-          ce_source:
+          ce-source:
             type: string
             const: /mathtrail/risingwave
-          ce_id:
+          ce-id:
             type: string
-          ce_time:
+          ce-time:
             type: string
       payload:
         type: object
