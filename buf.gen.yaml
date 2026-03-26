@@ -8,4 +8,3 @@ plugins:
     out: gen/ts
     opt:
       - target=ts
-      - paths=source_relative
