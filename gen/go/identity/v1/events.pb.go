@@ -22,14 +22,13 @@ const (
 )
 
 // UserCreated is published when a new Kratos identity is created.
-// Replaces the KratosIdentity Avro schema.
 //
 // Produced by: RisingWave CDC sink (topic: identity.users.created)
 //
 // CloudEvents attributes (Kafka Binary Mode headers):
 //
-//	ce_type:    com.mathtrail.identity.user.created
-//	ce_source:  /mathtrail/risingwave
+//	ce-type:    com.mathtrail.identity.user.created
+//	ce-source:  /mathtrail/risingwave
 //
 // Wire format: Confluent [0x00][4-byte schema_id][protobuf bytes]
 type UserCreated struct {
@@ -132,14 +131,13 @@ func (x *UserCreated) GetTsMs() string {
 }
 
 // AddressCreated is published when a verifiable address is added to an identity.
-// Replaces the KratosVerifiableAddress Avro schema.
 //
 // Produced by: RisingWave CDC sink (topic: identity.addresses.created)
 //
 // CloudEvents attributes (Kafka Binary Mode headers):
 //
-//	ce_type:    com.mathtrail.identity.address.created
-//	ce_source:  /mathtrail/risingwave
+//	ce-type:    com.mathtrail.identity.address.created
+//	ce-source:  /mathtrail/risingwave
 type AddressCreated struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Unique event identifier (UUID v4)

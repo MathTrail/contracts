@@ -29,8 +29,8 @@ const (
 //
 // CloudEvents attributes (Kafka Binary Mode headers):
 //
-//	ce_type:    com.mathtrail.students.onboarding.ready
-//	ce_source:  /mathtrail/risingwave
+//	ce-type:    com.mathtrail.students.onboarding.ready
+//	ce-source:  /mathtrail/risingwave
 //
 // Wire format: Confluent [0x00][4-byte schema_id][protobuf bytes]
 type StudentOnboardingReady struct {
