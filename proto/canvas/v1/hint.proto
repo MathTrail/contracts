@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package canvas.v1;
+
+option go_package = "github.com/mathtrail/contracts/gen/go/canvas/v1;canvasv1";
+
+// HighlightRect defines a rectangular region on the canvas to highlight
+// when displaying a hint. Coordinates are in canvas (pixel) space.
+message HighlightRect {
+  float x = 1;
+  float y = 2;
+  float width = 3;
+  float height = 4;
+}
+
+// HintEvent is published when the solution validator has analyzed a student's
+// strokes and produced a pedagogical hint.
+//
+// Produced by: solution-validator (topic: canvas.hints)
+// Consumed by: canvas-api → pushed to student via Centrifugo channel canvas:{session_id}
+//
+// CloudEvents attributes (Kafka Binary Mode headers):
+//   ce-type:    com.mathtrail.canvas.hint.generated
+//   ce-source:  /mathtrail/solution-validator
+//
+// Wire format: Protobuf binary (Content-Type: application/octet-stream)
+//
+// hint_type values:
+//   "warning" — student made an error at the highlighted area
+//   "success" — student completed a step correctly
+message HintEvent {
+  string id = 1;
+  string session_id = 2;
+  string hint_text = 3;
+  HighlightRect rect = 4;
+  string hint_type = 5;
+  string occurred_at = 6;
+}

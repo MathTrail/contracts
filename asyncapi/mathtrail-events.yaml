@@ -50,6 +50,30 @@ channels:
     address: students.onboarding.ready.dlq
     description: Dead-letter queue for StudentOnboardingReady events that fail schema validation in mentor-api.
 
+  canvas/strokes:
+    address: canvas.strokes
+    description: |
+      Published when a student submits stylus strokes on the math canvas.
+      Produced by canvas-api after validating the Ory session.
+
+      **Wire format:** Plain Protobuf binary — NO Confluent Wire Format prefix, NO CloudEvents headers.
+      Partition key = `session_id` (bytes) — guarantees per-session stroke ordering.
+    messages:
+      canvasStrokeEvent:
+        $ref: "#/components/messages/CanvasStrokeEvent"
+
+  canvas/hints:
+    address: canvas.hints
+    description: |
+      Published by AI/LLM services after analysing student strokes.
+      Consumed by canvas-api, which forwards hints to the student canvas in real time via Centrifugo WebSocket.
+
+      **Wire format:** Plain Protobuf binary — NO Confluent Wire Format prefix, NO CloudEvents headers.
+      Partition key = `session_id` (bytes).
+    messages:
+      hintEvent:
+        $ref: "#/components/messages/HintEvent"
+
 operations:
   publishStudentOnboardingReady:
     action: send
@@ -62,6 +86,18 @@ operations:
     channel:
       $ref: "#/channels/students~1onboarding~1ready"
     description: mentor-api consumes StudentOnboardingReady to create mentor recommendations.
+
+  publishCanvasStrokeEvent:
+    action: send
+    channel:
+      $ref: "#/channels/canvas~1strokes"
+    description: canvas-api publishes CanvasStrokeEvent after validating the student session.
+
+  consumeCanvasHint:
+    action: receive
+    channel:
+      $ref: "#/channels/canvas~1hints"
+    description: canvas-api consumes HintEvent and pushes it to the student canvas via Centrifugo WebSocket.
 
 components:
   messages:
@@ -179,6 +215,93 @@ components:
           Protobuf message: identity.v1.AddressCreated
           Schema: proto/identity/v1/events.proto
           Apicurio subject: identity.v1.AddressCreated
+
+    CanvasStrokeEvent:
+      name: CanvasStrokeEvent
+      title: Canvas Stroke Event
+      summary: A batch of stylus strokes submitted by a student on the math canvas.
+      contentType: application/vnd.google.protobuf
+      description: |
+        **Wire format:** Plain Protobuf binary (no Confluent Wire Format prefix, no CloudEvents headers).
+        Schema: `proto/canvas/v1/stroke.proto` · message `canvas.v1.CanvasStrokeEvent`
+        Apicurio: not registered — direct Protobuf, no schema registry lookup.
+      payload:
+        type: object
+        description: Protobuf message canvas.v1.CanvasStrokeEvent
+        properties:
+          event_id:
+            type: string
+            description: Unique event ID (UUID v4)
+          session_id:
+            type: string
+            description: Canvas session ID — also used as Kafka partition key
+          task_id:
+            type: string
+            description: Task being solved
+          user_id:
+            type: string
+            description: Student Kratos identity ID (stamped server-side, not trusted from client)
+          strokes:
+            type: array
+            description: Batch of strokes with points and tool type
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                tool:
+                  type: string
+                  description: '"pen" or "eraser"'
+                points:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      x: { type: number }
+                      y: { type: number }
+                      pressure: { type: number }
+          occurred_at:
+            type: string
+            description: ISO 8601 timestamp
+
+    HintEvent:
+      name: HintEvent
+      title: Hint Event
+      summary: An AI-generated hint for a specific region of the student's canvas.
+      contentType: application/vnd.google.protobuf
+      description: |
+        **Wire format:** Plain Protobuf binary (no Confluent Wire Format prefix, no CloudEvents headers).
+        Schema: `proto/canvas/v1/hint.proto` · message `canvas.v1.HintEvent`
+        Apicurio: not registered — direct Protobuf, no schema registry lookup.
+
+        Consumed by canvas-api → forwarded to `canvas:{session_id}` Centrifugo channel via HTTP Publish API.
+      payload:
+        type: object
+        description: Protobuf message canvas.v1.HintEvent
+        properties:
+          id:
+            type: string
+            description: Unique hint ID (UUID v4) — used as React key on the client
+          session_id:
+            type: string
+            description: Canvas session ID — routes the hint to the correct Centrifugo channel
+          hint_text:
+            type: string
+            description: Human-readable hint text displayed below the highlight rect
+          rect:
+            type: object
+            description: Canvas area to highlight (in Konva stage coordinates)
+            properties:
+              x: { type: number }
+              y: { type: number }
+              width: { type: number }
+              height: { type: number }
+          hint_type:
+            type: string
+            description: '"warning" (red) or "success" (green)'
+          occurred_at:
+            type: string
+            description: ISO 8601 timestamp
 
   securitySchemes:
     scramSha512:

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package canvas.v1;
+
+option go_package = "github.com/mathtrail/contracts/gen/go/canvas/v1;canvasv1";
+
+// Point represents a single input sample from a stylus or mouse.
+// pressure is normalized to [0.0, 1.0]; use 0.5 as default for mouse input.
+message Point {
+  float x = 1;
+  float y = 2;
+  float pressure = 3;
+}
+
+// Stroke is a single continuous drawn path (pen-down to pen-up).
+// tool is either "pen" or "eraser".
+message Stroke {
+  string id = 1;
+  repeated Point points = 2;
+  string tool = 3;
+}
+
+// CanvasStrokeEvent is published when a student completes one or more strokes
+// on the interactive canvas (pen-up event).
+//
+// Produced by: canvas-api (topic: canvas.strokes)
+// Consumed by: solution-validator
+//
+// CloudEvents attributes (Kafka Binary Mode headers):
+//   ce-type:    com.mathtrail.canvas.strokes.added
+//   ce-source:  /mathtrail/canvas-api
+//
+// Wire format: Protobuf binary (Content-Type: application/octet-stream)
+//
+// Partition key: session_id ([]byte) — guarantees per-student ordering in
+// each partition, which is critical for correct chronological OCR/LLM analysis.
+message CanvasStrokeEvent {
+  string event_id = 1;
+  string session_id = 2;
+  string task_id = 3;
+  string user_id = 4;
+  repeated Stroke strokes = 5;
+  string occurred_at = 6;
+}
