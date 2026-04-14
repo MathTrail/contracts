@@ -17,7 +17,6 @@ build:
       custom:
         buildCommand: just build-push-image
         dependencies:
-          dockerfile:
-            path: eventcatalog/Dockerfile
           paths:
+            - eventcatalog/Dockerfile
             - asyncapi/
