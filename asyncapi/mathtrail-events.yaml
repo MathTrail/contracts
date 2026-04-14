@@ -5,10 +5,10 @@ info:
   description: |
     Event contracts for MathTrail platform EDA stack.
 
-    **Stack:** RisingWave CDC → AutoMQ (MinIO) → Protobuf + CloudEvents Binary Mode
-    **Wire format:** Confluent Wire Format — `[0x00][4-byte schema_id][protobuf bytes]`
-    **Schema Registry:** Apicurio Registry (Confluent compat API v7)
-    **CloudEvents:** Binary Mode — CE attributes in Kafka record headers
+    - **Stack:** RisingWave CDC → AutoMQ (MinIO) → Protobuf + CloudEvents Binary Mode
+    - **Wire format:** Confluent Wire Format — `[0x00][4-byte schema_id][protobuf bytes]`
+    - **Schema Registry:** Apicurio Registry (Confluent compat API v7)
+    - **CloudEvents:** Binary Mode — CE attributes in Kafka record headers
 
 servers:
   local-automq:
@@ -23,6 +23,7 @@ channels:
     address: students.onboarding.ready
     description: |
       Published when a new student identity is active and ready for mentor assignment.
+
       Produced by RisingWave materialized view joining identities + verifiable_addresses.
     messages:
       studentOnboardingReady:
@@ -32,6 +33,7 @@ channels:
     address: identity.users.created
     description: |
       Published when a new Kratos identity is created (CDC from public.identities).
+
       Produced by RisingWave CDC source.
     messages:
       userCreated:
@@ -41,6 +43,7 @@ channels:
     address: identity.addresses.created
     description: |
       Published when a verifiable address is created (CDC from public.identity_verifiable_addresses).
+
       Produced by RisingWave CDC source.
     messages:
       addressCreated:
@@ -57,6 +60,7 @@ channels:
       Produced by canvas-api after validating the Ory session.
 
       **Wire format:** Plain Protobuf binary — NO Confluent Wire Format prefix, NO CloudEvents headers.
+
       Partition key = `session_id` (bytes) — guarantees per-session stroke ordering.
     messages:
       canvasStrokeEvent:
@@ -69,6 +73,7 @@ channels:
       Consumed by canvas-api, which forwards hints to the student canvas in real time via Centrifugo WebSocket.
 
       **Wire format:** Plain Protobuf binary — NO Confluent Wire Format prefix, NO CloudEvents headers.
+
       Partition key = `session_id` (bytes).
     messages:
       hintEvent:
@@ -108,6 +113,7 @@ components:
       contentType: application/vnd.google.protobuf
       headers:
         type: object
+        additionalProperties: false
         properties:
           ce-specversion:
             type: string
@@ -135,10 +141,11 @@ components:
           - ce-time
       payload:
         type: object
+        additionalProperties: false
         description: |
-          Protobuf message: students.v1.StudentOnboardingReady
-          Schema: proto/students/v1/events.proto
-          Apicurio subject: students.v1.StudentOnboardingReady
+          - Protobuf message: `students.v1.StudentOnboardingReady`
+          - Schema: `proto/students/v1/events.proto`
+          - Apicurio subject: `students.v1.StudentOnboardingReady`
         properties:
           event_id:
             type: string
@@ -167,6 +174,7 @@ components:
       contentType: application/vnd.google.protobuf
       headers:
         type: object
+        additionalProperties: false
         properties:
           ce-specversion:
             type: string
@@ -183,10 +191,11 @@ components:
             type: string
       payload:
         type: object
+        additionalProperties: false
         description: |
-          Protobuf message: identity.v1.UserCreated
-          Schema: proto/identity/v1/events.proto
-          Apicurio subject: identity.v1.UserCreated
+          - Protobuf message: `identity.v1.UserCreated`
+          - Schema: `proto/identity/v1/events.proto`
+          - Apicurio subject: `identity.v1.UserCreated`
 
     AddressCreated:
       name: AddressCreated
@@ -195,6 +204,7 @@ components:
       contentType: application/vnd.google.protobuf
       headers:
         type: object
+        additionalProperties: false
         properties:
           ce-specversion:
             type: string
@@ -211,10 +221,11 @@ components:
             type: string
       payload:
         type: object
+        additionalProperties: false
         description: |
-          Protobuf message: identity.v1.AddressCreated
-          Schema: proto/identity/v1/events.proto
-          Apicurio subject: identity.v1.AddressCreated
+          - Protobuf message: `identity.v1.AddressCreated`
+          - Schema: `proto/identity/v1/events.proto`
+          - Apicurio subject: `identity.v1.AddressCreated`
 
     CanvasStrokeEvent:
       name: CanvasStrokeEvent
@@ -222,12 +233,13 @@ components:
       summary: A batch of stylus strokes submitted by a student on the math canvas.
       contentType: application/vnd.google.protobuf
       description: |
-        **Wire format:** Plain Protobuf binary (no Confluent Wire Format prefix, no CloudEvents headers).
-        Schema: `proto/canvas/v1/stroke.proto` · message `canvas.v1.CanvasStrokeEvent`
-        Apicurio: not registered — direct Protobuf, no schema registry lookup.
+        - **Wire format:** Plain Protobuf binary (no Confluent Wire Format prefix, no CloudEvents headers).
+        - Schema: `proto/canvas/v1/stroke.proto` · message `canvas.v1.CanvasStrokeEvent`
+        - Apicurio: not registered — direct Protobuf, no schema registry lookup.
       payload:
         type: object
-        description: Protobuf message canvas.v1.CanvasStrokeEvent
+        additionalProperties: false
+        description: Protobuf message `canvas.v1.CanvasStrokeEvent`
         properties:
           event_id:
             type: string
@@ -246,6 +258,7 @@ components:
             description: Batch of strokes with points and tool type
             items:
               type: object
+              additionalProperties: false
               properties:
                 id:
                   type: string
@@ -256,6 +269,7 @@ components:
                   type: array
                   items:
                     type: object
+                    additionalProperties: false
                     properties:
                       x: { type: number }
                       y: { type: number }
@@ -270,14 +284,15 @@ components:
       summary: An AI-generated hint for a specific region of the student's canvas.
       contentType: application/vnd.google.protobuf
       description: |
-        **Wire format:** Plain Protobuf binary (no Confluent Wire Format prefix, no CloudEvents headers).
-        Schema: `proto/canvas/v1/hint.proto` · message `canvas.v1.HintEvent`
-        Apicurio: not registered — direct Protobuf, no schema registry lookup.
+        - **Wire format:** Plain Protobuf binary (no Confluent Wire Format prefix, no CloudEvents headers).
+        - Schema: `proto/canvas/v1/hint.proto` · message `canvas.v1.HintEvent`
+        - Apicurio: not registered — direct Protobuf, no schema registry lookup.
 
         Consumed by canvas-api → forwarded to `canvas:{session_id}` Centrifugo channel via HTTP Publish API.
       payload:
         type: object
-        description: Protobuf message canvas.v1.HintEvent
+        additionalProperties: false
+        description: Protobuf message `canvas.v1.HintEvent`
         properties:
           id:
             type: string
@@ -290,6 +305,7 @@ components:
             description: Human-readable hint text displayed below the highlight rect
           rect:
             type: object
+            additionalProperties: false
             description: Canvas area to highlight (in Konva stage coordinates)
             properties:
               x: { type: number }

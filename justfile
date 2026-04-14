@@ -36,10 +36,9 @@ ci-lint:
 ci-test:
     buf breaking --against '.git#branch=main'
 
-# Generate Go code + build EventCatalog (verify everything compiles)
+# Generate Go code
 ci-build:
     buf generate
-    cd eventcatalog && npm ci && npm run build
 
 # -- Image Build --------------------------------------------------------------
 
@@ -53,7 +52,11 @@ build-push-image tag=env("IMAGE", ""):
         echo "Error: no image tag provided" >&2
         exit 1
     fi
-    buildah --storage-driver=vfs bud --log-level=error \
-        --tag "$TAG" eventcatalog/
-    buildah --storage-driver=vfs push --log-level=error \
-        --tls-verify=false "$TAG"
+    # Derive registry/repository from tag (strip the last :xxx part)
+    REPO="${TAG%:*}"
+    buildah bud --no-cache --log-level=error \
+        --file eventcatalog/Dockerfile --tag "$TAG" .
+    buildah push --log-level=error --tls-verify=false "$TAG"
+    # Also push as :latest so the k3d cluster deployment picks it up
+    buildah tag "$TAG" "${REPO}:latest"
+    buildah push --log-level=error --tls-verify=false "${REPO}:latest"

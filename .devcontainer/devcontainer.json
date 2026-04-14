@@ -26,5 +26,10 @@
             ]
         }
     },
-    "postStartCommand": "bash .devcontainer/post-start.sh"
+    "postStartCommand": "bash .devcontainer/post-start.sh",
+    "runArgs": [
+        "--privileged",
+        "--add-host=host.docker.internal:host-gateway",
+        "--add-host=k3d-mathtrail-registry.localhost:host-gateway"
+    ]
 }
