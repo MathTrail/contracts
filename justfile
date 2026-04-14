@@ -43,20 +43,16 @@ ci-build:
 # -- Image Build --------------------------------------------------------------
 
 # Build and push EventCatalog Docker image
-# Usage: just build-push-image <tag>
+# Called by Skaffold via: just build-push-image
+# Uses $IMAGE env var set by Skaffold, or accepts a tag argument.
 build-push-image tag=env("IMAGE", ""):
     #!/bin/bash
     set -euo pipefail
     TAG="{{ tag }}"
     if [ -z "$TAG" ]; then
-        echo "Error: no image tag provided" >&2
+        echo "Error: no image tag provided (set \$IMAGE or pass as argument)" >&2
         exit 1
     fi
-    # Derive registry/repository from tag (strip the last :xxx part)
-    REPO="${TAG%:*}"
-    buildah bud --no-cache --log-level=error \
+    buildah --storage-driver=vfs bud --log-level=error \
         --file eventcatalog/Dockerfile --tag "$TAG" .
-    buildah push --log-level=error --tls-verify=false "$TAG"
-    # Also push as :latest so the k3d cluster deployment picks it up
-    buildah tag "$TAG" "${REPO}:latest"
-    buildah push --log-level=error --tls-verify=false "${REPO}:latest"
+    buildah --storage-driver=vfs push --log-level=error --tls-verify=false "$TAG"

@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: eventcatalog
+
+build:
+  local:
+    push: true
+    tryImportMissing: true
+  tagPolicy:
+    inputDigest: {}
+  insecureRegistries:
+    - ${REGISTRY_CLUSTER}
+  artifacts:
+    - image: eventcatalog
+      context: .
+      custom:
+        buildCommand: just build-push-image
+        dependencies:
+          dockerfile:
+            path: eventcatalog/Dockerfile
+          paths:
+            - asyncapi/
