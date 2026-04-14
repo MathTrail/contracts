@@ -29,7 +29,9 @@ jobs:
         uses: MathTrail/core/.github/actions/setup-env@v1
 
       - name: Set build context
-        run: echo "SKAFFOLD_DEFAULT_REPO=${REGISTRY_CLUSTER}" >> "$GITHUB_ENV"
+        run: |
+          echo "SKAFFOLD_DEFAULT_REPO=${REGISTRY_CLUSTER}" >> "$GITHUB_ENV"
+          skaffold config set insecure-registries "${REGISTRY_CLUSTER}" --global
 
       - name: Build and Push EventCatalog image
         run: skaffold build -m eventcatalog --tag="${{ github.sha }}"
