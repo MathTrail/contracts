@@ -129,7 +129,7 @@ http://<cluster>/observability/eventcatalog
 To build the Docker image locally:
 
 ```bash
-just build-push-image k3d-mathtrail-registry.localhost:5050/eventcatalog:local
+just build-push-image k3d-mathtrail-registry.localhost:5050/eventcatalog:latest
 ```
 
 CI builds and pushes the image on every merge to `main`.
