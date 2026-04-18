@@ -1,6 +1,6 @@
 # contracts
 
-Single source of truth for MathTrail event schemas, generated Go client code, AsyncAPI specification, and EventCatalog documentation.
+Single source of truth for MathTrail event schemas, generated Go client code, AsyncAPI specification, and AsyncAPI HTML documentation portal.
 
 ## Overview
 
@@ -9,7 +9,7 @@ This repository defines the event contracts for the MathTrail EDA stack. It cont
 - **Protobuf schemas** — strongly-typed event definitions managed with [buf](https://buf.build)
 - **Generated Go code** — committed `.pb.go` files, importable as a Go module without running `buf` locally
 - **AsyncAPI v3 specification** — machine-readable channel and message contracts
-- **EventCatalog** — documentation portal built from the AsyncAPI spec, deployed to the cluster at `/observability/eventcatalog`
+- **AsyncAPI HTML portal** — documentation portal built from the AsyncAPI spec via `@asyncapi/generator`, deployed to the cluster at `/observability/eventcatalog`
 
 ## Event Pipeline
 
@@ -103,7 +103,7 @@ replace github.com/mathtrail/contracts => ../contracts
 4. Run `just lint` and `just breaking` to validate
 5. Add the new subject to `infra-streaming/infra/local/helm/apicurio/templates/schema-registration.yaml`
 6. Add the new channel and message to `asyncapi/mathtrail-events.yaml`
-7. Commit — CI will validate lint, breaking changes, and EventCatalog build
+7. Commit — CI will validate lint, breaking changes, and AsyncAPI portal build
 
 ## Schema Registration
 
@@ -118,9 +118,9 @@ Body: {"schemaType": "PROTOBUF", "schema": "<escaped .proto content>"}
 Subject naming: `{package}.{MessageName}` — e.g. `students.v1.StudentOnboardingReady`.
 This ensures the subject name matches exactly what RisingWave uses in `FORMAT PLAIN ENCODE PROTOBUF`.
 
-## EventCatalog
+## AsyncAPI Portal
 
-The EventCatalog portal is built from `asyncapi/mathtrail-events.yaml` and deployed to the cluster:
+The HTML portal is built from `asyncapi/mathtrail-events.yaml` using `@asyncapi/generator` and deployed to the cluster:
 
 ```
 http://<cluster>/observability/eventcatalog
