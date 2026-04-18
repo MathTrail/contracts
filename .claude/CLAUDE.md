@@ -2,9 +2,9 @@
 
 ## Overview
 
-Single source of truth for MathTrail event schemas, generated Go code, AsyncAPI specification, and EventCatalog documentation portal.
+Single source of truth for MathTrail event schemas, generated Go code, AsyncAPI specification, and AsyncAPI HTML documentation portal.
 
-**Language:** Go 1.23 (generated code) · Node.js 22 (EventCatalog)
+**Language:** Go 1.23 (generated code) · Node.js 22 (@asyncapi/generator)
 **Go module:** `github.com/mathtrail/contracts`
 **Cluster:** k3d `mathtrail-dev`, namespace `streaming`
 
@@ -16,7 +16,7 @@ Single source of truth for MathTrail event schemas, generated Go code, AsyncAPI 
 | Proto toolchain | [buf](https://buf.build) — lint, breaking change detection, generate |
 | Go code generation | `buf.build/protocolbuffers/go` remote plugin |
 | API specification | AsyncAPI v3 |
-| Documentation portal | EventCatalog 2.x (generated from AsyncAPI) |
+| Documentation portal | `@asyncapi/generator` + `@asyncapi/html-template` (generated from AsyncAPI) |
 | Portal serving | nginx (static site, path `/observability/eventcatalog`) |
 | Image build | buildah (CI) |
 
@@ -29,8 +29,7 @@ Single source of truth for MathTrail event schemas, generated Go code, AsyncAPI 
 | `proto/common/v1/cloudevent.proto` | CloudEvent envelope — Variant B fallback only, NOT imported by event protos |
 | `gen/go/` | Generated `.pb.go` files — committed, importable without buf |
 | `asyncapi/mathtrail-events.yaml` | AsyncAPI v3 — channels, messages, CE headers, SCRAM security |
-| `eventcatalog/eventcatalog.config.js` | EventCatalog config — AsyncAPI generator pointing to `asyncapi/` |
-| `eventcatalog/Dockerfile` | Multi-stage: npm build → nginx |
+| `eventcatalog/Dockerfile` | Multi-stage: `ag` generates HTML from AsyncAPI → nginx |
 | `buf.yaml` | Module `buf.build/mathtrail/contracts`, STANDARD lint, FILE breaking rules |
 | `buf.gen.yaml` | Remote plugin `protocolbuffers/go`, output `gen/go/`, `paths=source_relative` |
 | `justfile` | Development and CI recipes |
@@ -112,9 +111,9 @@ just build        # generate + lint + go mod tidy
 # CI recipes (called by GitHub Actions runner)
 just ci-lint      # buf lint
 just ci-test      # buf breaking --against '.git#branch=main'
-just ci-build     # buf generate + npm ci + npm run build
+just ci-build     # buf generate + buildah build (AsyncAPI HTML portal)
 
-# Build and push EventCatalog image
+# Build and push AsyncAPI docs image
 just build-push-image "k3d-mathtrail-registry.localhost:5050/eventcatalog:local"
 ```
 
@@ -122,7 +121,7 @@ just build-push-image "k3d-mathtrail-registry.localhost:5050/eventcatalog:local"
 
 | Trigger | Jobs |
 |---|---|
-| PR → main | `buf lint` → `buf breaking` → `buf generate + npm build` |
+| PR → main | `buf lint` → `buf breaking` → `buf generate + buildah build` |
 | push → main | lint/breaking (test job) → `build-push-image eventcatalog:<sha>` (release job) |
 
 Runner: `mathtrail-runners` (self-hosted). Image pushed to `k3d-mathtrail-registry:5000/eventcatalog`.
@@ -134,7 +133,7 @@ Runner: `mathtrail-runners` (self-hosted). Image pushed to `k3d-mathtrail-regist
 3. Run `just generate` → commit updated `gen/go/`
 4. Add subject to `infra-streaming/infra/local/helm/apicurio/templates/schema-registration.yaml`
 5. Add channel + message to `asyncapi/mathtrail-events.yaml`
-6. PR — CI validates lint, breaking changes, and EventCatalog build
+6. PR — CI validates lint, breaking changes, and AsyncAPI portal build
 
 ## Using Generated Go Code
 
