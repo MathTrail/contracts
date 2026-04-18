@@ -6,7 +6,8 @@ RUN npm install -g @asyncapi/cli@6.0.0
 
 COPY asyncapi/ ./asyncapi/
 
-RUN asyncapi generate fromTemplate asyncapi/mathtrail-events.yaml @asyncapi/html-template@3.5.6 \
+RUN npm install @asyncapi/html-template@3.5.6 \
+    && asyncapi generate fromTemplate asyncapi/mathtrail-events.yaml ./node_modules/@asyncapi/html-template \
     -o /output --force-write
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine
