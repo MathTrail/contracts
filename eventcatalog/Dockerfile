@@ -1,12 +1,12 @@
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-RUN npm install -g @asyncapi/generator @asyncapi/html-template
+RUN npm install -g @asyncapi/cli@6.0.0
 
 COPY asyncapi/ ./asyncapi/
 
-RUN ag asyncapi/mathtrail-events.yaml @asyncapi/html-template \
+RUN asyncapi generate fromTemplate asyncapi/mathtrail-events.yaml @asyncapi/html-template@3.5.6 \
     -o /output --force-write
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine
