@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package students.v2;
+
+option go_package = "github.com/mathtrail/contracts/gen/go/students/v2;studentsv2";
+
+// StudentOnboardingReady v2 — extends v1 with schema_id field.
+//
+// Produced by: RisingWave CDC sink (topic: students.onboarding.ready)
+// Consumed by: mentor-api
+//
+// CloudEvents attributes (Kafka Binary Mode headers):
+//   ce-type:    com.mathtrail.students.onboarding.ready
+//   ce-source:  /mathtrail/risingwave
+//
+// Wire format: Confluent [0x00][4-byte schema_id][protobuf bytes]
+message StudentOnboardingReady {
+  // Unique event identifier (MD5 hex of identity_id || address_id, deterministic for idempotency)
+  string event_id = 1;
+
+  // Kratos identity ID (UUID)
+  string user_id = 2;
+
+  // Verified email address from identity_verifiable_addresses
+  string email = 3;
+
+  // First name extracted from Kratos identity traits JSONB
+  string first_name = 4;
+
+  // Last name extracted from Kratos identity traits JSONB
+  string last_name = 5;
+
+  // User role, always "student" for this event
+  string role = 6;
+
+  // ISO 8601 timestamp when the event occurred
+  string occurred_at = 7;
+
+  // Kratos identity schema ID (e.g. "default") — NEW in v2
+  string schema_id = 8;
+}

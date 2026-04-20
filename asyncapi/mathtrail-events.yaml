@@ -49,6 +49,17 @@ channels:
       addressCreated:
         $ref: "#/components/messages/AddressCreated"
 
+  students/onboarding/ready/v2:
+    address: students.onboarding.ready
+    description: |
+      v2 of the StudentOnboardingReady event — same topic as v1, version distinguished
+      by the 4-byte schema_id in the Confluent Wire Format prefix.
+
+      Adds `schema_id` field: the Kratos identity schema ID used when the identity was created.
+    messages:
+      studentOnboardingReadyV2:
+        $ref: "#/components/messages/StudentOnboardingReadyV2"
+
   students/onboarding/ready/dlq:
     address: students.onboarding.ready.dlq
     description: Dead-letter queue for StudentOnboardingReady events that fail schema validation in mentor-api.
@@ -91,6 +102,18 @@ operations:
     channel:
       $ref: "#/channels/students~1onboarding~1ready"
     description: mentor-api consumes StudentOnboardingReady to create mentor recommendations.
+
+  publishStudentOnboardingReadyV2:
+    action: send
+    channel:
+      $ref: "#/channels/students~1onboarding~1ready~1v2"
+    description: RisingWave publishes StudentOnboardingReadyV2 after CDC pipeline upgrade to v2.
+
+  consumeStudentOnboardingReadyV2:
+    action: receive
+    channel:
+      $ref: "#/channels/students~1onboarding~1ready~1v2"
+    description: mentor-api consumes StudentOnboardingReadyV2, gains access to schema_id field.
 
   publishCanvasStrokeEvent:
     action: send
@@ -166,6 +189,70 @@ components:
           occurred_at:
             type: string
             description: ISO 8601 timestamp
+
+    StudentOnboardingReadyV2:
+      name: StudentOnboardingReadyV2
+      title: Student Onboarding Ready (v2)
+      summary: A student identity is active and ready for mentor matching. Adds schema_id field.
+      contentType: application/vnd.google.protobuf
+      headers:
+        type: object
+        additionalProperties: false
+        properties:
+          ce-specversion:
+            type: string
+            const: "1.0"
+            description: CloudEvents spec version
+          ce-type:
+            type: string
+            const: com.mathtrail.students.onboarding.ready
+            description: CloudEvents event type
+          ce-source:
+            type: string
+            const: /mathtrail/risingwave
+            description: CloudEvents source
+          ce-id:
+            type: string
+            description: CloudEvents unique event ID (UUID v4, generated per message)
+          ce-time:
+            type: string
+            description: CloudEvents event time (ISO 8601)
+        required:
+          - ce-specversion
+          - ce-type
+          - ce-source
+          - ce-id
+          - ce-time
+      payload:
+        type: object
+        additionalProperties: false
+        description: |
+          - Protobuf message: `students.v2.StudentOnboardingReady`
+          - Schema: `proto/students/v2/events.proto`
+          - Apicurio subject: `students.v2.StudentOnboardingReady`
+        properties:
+          event_id:
+            type: string
+            description: Unique event ID (MD5 hex of identity_id || address_id)
+          user_id:
+            type: string
+            description: Kratos identity ID (UUID)
+          email:
+            type: string
+            description: Verified email address
+          first_name:
+            type: string
+          last_name:
+            type: string
+          role:
+            type: string
+            const: student
+          occurred_at:
+            type: string
+            description: ISO 8601 timestamp
+          schema_id:
+            type: string
+            description: Kratos identity schema ID (e.g. "default") — new in v2
 
     UserCreated:
       name: UserCreated
